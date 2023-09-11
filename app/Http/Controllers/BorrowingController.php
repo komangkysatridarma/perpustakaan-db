@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Borrowing;
+use App\Models\Book;
+use App\Models\Student;
 use Illuminate\Http\Request;
 
 class BorrowingController extends Controller
@@ -12,7 +14,8 @@ class BorrowingController extends Controller
      */
     public function index()
     {
-        //
+        $borrowings = Borrowing::latest()->paginate(5);
+        return view('borrowings.index', compact('borrowings'))->with('i', (request()->input('page',1)- 1)* 5);
     }
 
     /**
@@ -20,7 +23,10 @@ class BorrowingController extends Controller
      */
     public function create()
     {
-        //
+        $books = Book::all();
+        $students = Student::all(); 
+        return view('borrowings.create',compact('books', $books, 'students', $students));
+
     }
 
     /**
@@ -28,7 +34,17 @@ class BorrowingController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nama_peminjam'=>'required',
+            'judul_buku'=>'required',
+            'tgl_pinjam'=>'required',
+            'tgl_kembali'=>'required',
+            'ket'=>'required'
+        ]);
+
+        Borrowing::create($request->all());
+        return redirect()->route('borrowings.index')->with('success','Berhasil Menyimpan !');
+                        
     }
 
     /**
@@ -44,7 +60,9 @@ class BorrowingController extends Controller
      */
     public function edit(Borrowing $borrowing)
     {
-        //
+        $books = Book::all();
+        $students = Student::all(); 
+        return view('borrowings.edit',compact('borrowing', 'books', 'students'));
     }
 
     /**
@@ -52,7 +70,17 @@ class BorrowingController extends Controller
      */
     public function update(Request $request, Borrowing $borrowing)
     {
-        //
+        $request->validate([
+            'nama_peminjam'=>'required',
+            'judul_buku'=>'required',
+            'tgl_pinjam'=>'required',
+            'tgl_kembali'=>'required',
+            'ket'=>'required'
+        ]);
+
+        $borrowing->update($request->all());
+        return redirect()->route('borrowings.index')->with('success','Berhasil Update !');
+                        
     }
 
     /**
@@ -60,6 +88,9 @@ class BorrowingController extends Controller
      */
     public function destroy(Borrowing $borrowing)
     {
-        //
+        $borrowing->delete();
+
+        return redirect()->route('borrowings.index')->with('success','Berhasil Hapus !');
+                        
     }
 }
